@@ -292,7 +292,7 @@ def clearMoveTable():        # PUBLIC
 
 
 def moveTableSize():     # PUBLIC
-   print(('moveTable entries: ' + str(len(moveTable))))
+   print('moveTable entries: ' + str(len(moveTable)))
 
 
 # *********************************************************************************

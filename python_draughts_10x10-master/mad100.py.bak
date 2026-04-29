@@ -97,8 +97,8 @@ pst_ext = {
 
 # Internal representation of PST with zeros at begin and end (rotation-symmetry)
 PST = {'P': [], 'K': []}
-PST['P'] = [0] + list(map( int, pst_ext['P'].split() )) + [0]
-PST['K'] = [0] + list(map( int, pst_ext['K'].split() )) + [0]
+PST['P'] = [0] + map( int, pst_ext['P'].split() ) + [0]
+PST['K'] = [0] + map( int, pst_ext['K'].split() ) + [0]
 
 PMAT = {'P': 1000, 'K': 3000}   # piece material values
 
@@ -141,7 +141,7 @@ class Position:
         p =  board[i]
 
         # Move piece and promote to white king
-        promotion_line = list(range(1,6))
+        promotion_line = range(1,6)
         board[i] = '.'
         if j in promotion_line and (p != 'K'):
            board[j] = 'K'
@@ -173,7 +173,7 @@ class Position:
         p =  self.board[i]   # move always done for uppercase char!
 
         # Actual move: increment of score by move
-        promotion_line = list(range(1,6))
+        promotion_line = range(1,6)
         if j in promotion_line and (p != 'K'):
            from_val = PST[p][i] + PMAT[p]
            to_val = PST['K'][j] + PMAT['K']    # piece promoted to king
@@ -215,7 +215,7 @@ if sys.version_info[0] == 2:
 def parse_move(move):
     # Parameter move in alfanumeric format like 32-28 or 26x37.
     # Return list of steps of move/capture in number format.
-    nsteps = list(map( int, re.split('[-x]', move) ))
+    nsteps = map( int, re.split('[-x]', move) )
     return nsteps
 
 def render_move(move):
@@ -225,7 +225,7 @@ def render_move(move):
 
 def match_move(pos, steps):
     # Match list of steps with a legal move. 
-    nsteps = list(map( int, steps ))
+    nsteps = map( int, steps )
     lmoves = gen_moves(pos)   # legal moves
     if len(nsteps) == 2:
        for move in lmoves:
@@ -270,7 +270,7 @@ def print_pos(pos):
        spaces = ' ' * numSpaces                   # spaces before row of pieces
        numbering = ' %2d - %2d ' %( start, start + nrows//2 - 1)
        pieces = '   '.join(piececode.get(p, p) for p in row)
-       print((numbering + '   ' + spaces + pieces))
+       print(numbering + '   ' + spaces + pieces)
     print("")
 
 def main():
@@ -284,10 +284,10 @@ def main():
     print_pos(pos)
     player = 1
     max_nodes = mad100_search.MAX_NODES
-    print(('   Strength max nodes: %d' %(max_nodes) ))
+    print('   Strength max nodes: %d' %(max_nodes) )
 
     while True:
-        comm = eval(input('Command: ' ))
+        comm = input('Command: ' )
 
         if comm == 'quit' or comm == 'q':
             break
@@ -299,7 +299,7 @@ def main():
             elif len(comm.split()) == 2:
                level = int(comm.split()[1])
                max_nodes = int(level) 
-            print(('   Level max nodes: %d' %(max_nodes) ))
+            print('   Level max nodes: %d' %(max_nodes) )
 
         elif comm == 'go':
             # let MAD100 search for next move
@@ -308,13 +308,13 @@ def main():
 
             # We don't play well once we have detected our death
             if move is None:
-                print(('no move found', ' score: ', score))
+                print('no move found', ' score: ', score)
             elif score >= mad100_search.MATE_VALUE:
                 print('very high score')
             elif score <= -mad100_search.MATE_VALUE:
                 print('very low score')
             else:
-                print((mad100_play.mrender_move(color, move)))
+                print(mad100_play.mrender_move(color, move))
                 pos = pos.domove(move)
                 color = 1-color   # alternating 0 and 1 (WHITE and BLACK)
                 player = -player
@@ -337,7 +337,7 @@ def main():
             print()
  
         else:
-            print(("Error (unkown command):", comm))
+            print("Error (unkown command):", comm)
 
     return 0
 

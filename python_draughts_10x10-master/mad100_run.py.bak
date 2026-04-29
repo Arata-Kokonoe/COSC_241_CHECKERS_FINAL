@@ -46,7 +46,7 @@ def main():
             lstring = ''
             for lmove in gen_moves(pos):
                lstring += mrender_move(color, lmove) + '  '
-            print(('Legal moves: ', lstring))
+            print('Legal moves: ', lstring)
 
         elif comm.startswith('nodes'):
             # Set max_nodes to search
@@ -55,7 +55,7 @@ def main():
             elif len(comm.split()) == 2:
                level = int(comm.split()[1])
                max_nodes = int(level)
-            print(('   Level max nodes: %d' %(max_nodes) ))
+            print('   Level max nodes: %d' %(max_nodes) )
 
         elif comm.startswith('new'):
             # Setup new position
@@ -85,7 +85,7 @@ def main():
 
         elif comm == 'eval':
             mprint_pos(color, pos)
-            print(("Score position: ", pos.score))
+            print("Score position: ", pos.score)
 
         elif comm.startswith('go'):
             if len(comm.split()) == 1:
@@ -94,11 +94,11 @@ def main():
                start = time.time()
                move, score = mad100_search.search(pos, maxn=max_nodes)
                finish = time.time()
-               print(("Time elapsed: ", str(finish - start)))
+               print("Time elapsed: ", str(finish - start))
 
                pv_list = list(mad100_search.gen_pv(pos, mad100_search.tp))
                ptr = -1
-               print(('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tp))))
+               print('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tp)))
             elif len(comm.split()) == 2:
                _, action = comm.split()
 
@@ -108,11 +108,11 @@ def main():
                   start = time.time()
                   move, score = mad100_search.search_pvf(pos, max_nodes)
                   finish = time.time()
-                  print(("Time elapsed: ", str(finish - start)))
+                  print("Time elapsed: ", str(finish - start))
 
                   pv_list = list(mad100_search.gen_pv(pos, mad100_search.tpf))
                   ptr = -1
-                  print(('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tpf))))
+                  print('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tpf)))
                elif action == 'ab':
                   # *** search with alpha-beta pruning ***
                   # search with normal alpha-beta for next move
@@ -120,18 +120,18 @@ def main():
                   start = time.time()
                   move, score = mad100_search.search_ab(pos, maxn=max_nodes)
                   finish = time.time()
-                  print(("Time elapsed: ", str(finish - start)))
+                  print("Time elapsed: ", str(finish - start))
 
                   pv_list = list(mad100_search.gen_pv(pos, mad100_search.tpab))
                   ptr = -1
-                  print(('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tpab))))
+                  print('Principal Variation: %s' % (render_pv(origc, pos, mad100_search.tpab)))
 
             if move is None:
-               print(('no move found', ' score: ', score))
+               print('no move found', ' score: ', score)
             elif score <= -mad100_search.MATE_VALUE:
                print('very low score')
             else:
-               print(('Best move:', mrender_move(color, move)))
+               print('Best move:', mrender_move(color, move))
 
 
         elif comm.startswith('p'):
@@ -150,7 +150,7 @@ def main():
                   ptr += 1
                   move = pv_list[ptr].move
                   if move in gen_moves(pos):
-                     print(('Move done:', mrender_move(color, move)))
+                     print('Move done:', mrender_move(color, move))
                      pos = pos.domove(move)
                      color = 1-color      # alternating 0 and 1 (WHITE and BLACK)
                      mprint_pos(color, pos)
@@ -180,22 +180,22 @@ def main():
         elif comm.startswith('ping'):
             if len(comm.split()) != 2: continue
             _, N = comm.split()
-            print(('pong', N))
+            print('pong', N)
 
         elif comm.startswith('m'):
             if len(comm.split()) == 1:
                start = time.time()
                move, score = mad100_search.search(pos, maxn=max_nodes)
                finish = time.time()
-               print(("Time elapsed: ", str(finish - start)))
+               print("Time elapsed: ", str(finish - start))
 
                if move is None:
-                  print(('no move found', ' score: ', score))
+                  print('no move found', ' score: ', score)
                elif score <= -mad100_search.MATE_VALUE:
                   print('very low score')
                else:
-                  print(('Principal Variation: %s' % (render_pv(color, pos, mad100_search.tp))))
-                  print(('Move done:', mrender_move(color, move)))
+                  print('Principal Variation: %s' % (render_pv(color, pos, mad100_search.tp)))
+                  print('Move done:', mrender_move(color, move))
                   pos = pos.domove(move)
                   color = 1-color      # alternating 0 and 1 (WHITE and BLACK)
                   mprint_pos(color, pos)
@@ -225,7 +225,7 @@ def main():
             #mad100_search.book_readFile('data/openbook_test15')
             mad100_search.book_readFile('data/mad100_openbook')
             finish = time.time()
-            print(("Time elapsed: ", str(finish - start)))
+            print("Time elapsed: ", str(finish - start))
 
         elif comm.upper().startswith('H') or comm.startswith('?'):
             print(' _________________________________________________________________  ')
@@ -274,14 +274,14 @@ def main():
                if mt_disabled: clearMoveTable()
             t1 = time.time()
 
-            print(("Time elapsed for test: ", str(t1 - t0), "  Max times: ", str(maxtimes) ))
+            print("Time elapsed for test: ", str(t1 - t0), "  Max times: ", str(maxtimes) )
 
         elif comm.startswith('test1'):
             # *** test1 ***
             moveTableSize()
         #===================================================================================
         else:
-            print(("Error (unkown command):", comm))
+            print("Error (unkown command):", comm)
 
 if __name__ == '__main__':
     main()

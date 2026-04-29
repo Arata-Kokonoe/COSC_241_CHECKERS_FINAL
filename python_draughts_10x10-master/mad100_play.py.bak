@@ -66,8 +66,8 @@ def parseFEN(iFen):
 def mrender_move(color, move):
     # Render move in numeric format (mutual version)
     if move is None: return ''
-    steps = move.steps if color == WHITE else [51-i for i in move.steps]
-    takes = move.takes if color == WHITE else [51-i for i in move.takes]
+    steps = move.steps if color == WHITE else map(lambda i: 51-i, move.steps)
+    takes = move.takes if color == WHITE else map(lambda i: 51-i, move.takes)
     rmove = Move(steps, takes)
     return mad100.render_move(rmove)
 
@@ -75,14 +75,14 @@ def mparse_move(color, move):
     # Parameter move in numeric format like 17-14 or 10x17.
     # Return list of steps of move/capture in number format depending on color.
     nsteps = mad100.parse_move(move)
-    return ( nsteps if color == WHITE else [51-i for i in nsteps] )
+    return ( nsteps if color == WHITE else map(lambda i: 51-i, nsteps) )
 
 def mprint_pos(color, pos):
     if color == WHITE:
        mad100.print_pos(pos)
     else:
        mad100.print_pos(pos.rotate())
-    print(( str(['white', 'black'][color]) + ' to move '))
+    print( str(['white', 'black'][color]) + ' to move ')
 
 def render_pv(origc, pos, tp):
     # Returns principal variation string of scores and moves from transposition table tp

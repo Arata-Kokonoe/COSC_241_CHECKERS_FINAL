@@ -113,8 +113,6 @@ def search(pos, maxn=MAX_NODES):
     # Iterative deepening MTD-bi search, the bisection search version of MTD
     # See the term "MTD-f" at wikipedia.
 
-    global tp
-
     move = book_searchMove(pos)
     if move is not None:
        print('Move from opening book')
@@ -126,10 +124,11 @@ def search(pos, maxn=MAX_NODES):
 
     global nodes; nodes = 0
     if len(tp) > (TABLE_SIZE // 2):
+       global tp
        tp.clear()            # empty dict when half full
     
-    print(('thinking ....   max nodes: %d' %(maxn) ))
-    print('%8s %8s %8s %8s' % ('depth', 'nodes', 'gamma', 'score'))   # header
+    print('thinking ....   max nodes: %d' %(maxn) )
+    print '%8s %8s %8s %8s' % ('depth', 'nodes', 'gamma', 'score')   # header
 
     # We limit the depth to some constant, so we don't get a stack overflow in the end game.
     for depth in range(1, 99):
@@ -147,7 +146,7 @@ def search(pos, maxn=MAX_NODES):
             if score < gamma:
                 upper = score
 
-        print('%8d %8d %8d %8d' % (depth, nodes, gamma, score))
+        print '%8d %8d %8d %8d' % (depth, nodes, gamma, score)
 
         # We stop deepening if the global node counter shows we have spent too long for this depth
         if nodes >= maxn:
@@ -248,20 +247,20 @@ def minimax_pvf(pos, depth, player):
 
 def search_pvf(pos, maxn=MAX_NODES):
    # Iterative deepening of forced variation sequence.
-   global tpf
    global xnodes; xnodes = 0
    player = 0            # 0 = starting player; 1 = opponent 
    if len(tpf) > (TABLE_SIZE // 2):
+      global tpf
       tpf.clear()            # empty dict when half full
 
-   print(('thinking ....   max nodes: %d' %(maxn) ))
-   print('%8s %8s %8s' % ('depth', 'nodes', 'score'))   # header
+   print('thinking ....   max nodes: %d' %(maxn) )
+   print '%8s %8s %8s' % ('depth', 'nodes', 'score')   # header
 
    for depth in range(1, 99):
       best = minimax_pvf(pos, depth, player)
 
       ## REPORT
-      print('%8d %8d %8d' % (depth, xnodes, best))
+      print '%8d %8d %8d' % (depth, xnodes, best)
       #print(render_pv(0, pos, tpf))
 
       # We stop deepening if the global N counter shows we have spent too long for this depth
@@ -368,15 +367,15 @@ def alphabeta(pos, alpha, beta, depthleft, player):
 def search_ab(pos, maxn=MAX_NODES):
     # Iterative deepening alpha-beta search enhanced with aspiration windows
     global ynodes; ynodes = 0
-    global tpab
     if len(tpab) > (TABLE_SIZE // 2):
+       global tpab
        tpab.clear()            # empty dict when half full
 
     lower, upper = -MATE_VALUE, MATE_VALUE
     valWINDOW = 50         # ASPIRATION WINDOW: tune for optimal results
 
-    print(('thinking ....   max nodes: %d' %(maxn) ))
-    print('%8s %8s %8s %8s %8s' % ('depth', 'nodes', 'score', 'alpha', 'beta'))   # header
+    print('thinking ....   max nodes: %d' %(maxn) )
+    print '%8s %8s %8s %8s %8s' % ('depth', 'nodes', 'score', 'alpha', 'beta')   # header
 
     # We limit the depth to some constant, so we don't get a stack overflow in the end game.
     alpha, beta = lower, upper
@@ -385,7 +384,7 @@ def search_ab(pos, maxn=MAX_NODES):
         player = 0            # 0 = starting player is max; 1 = opponent 
         score = alphabeta(pos, alpha, beta, depthleft, player)
 
-        print('%8d %8d %8d %8d %8d' % (depthleft, ynodes, score, alpha, beta))
+        print '%8d %8d %8d %8d %8d' % (depthleft, ynodes, score, alpha, beta)
 
         # We stop deepening if the global N counter shows we have spent too long for this depth
         if ynodes >= maxn:
@@ -421,10 +420,10 @@ def book_isPresent(f):
 def book_readFile(f):
    # Read opening book
    if not book_isPresent(f):
-      print(('Opening book not available: ' + f))
+      print('Opening book not available: ' + f)
       return 0    # no opening book found
 
-   print(("Reading opening book <" + f + ">  ...."))
+   print("Reading opening book <" + f + ">  ....")
    global tp_open; tp_open = OrderedDict()   # reset transposition table
    file = open(f, 'r')
    linecount = 0
@@ -435,7 +434,7 @@ def book_readFile(f):
       if line == '': continue
       movecount += book_addLine(line)
    file.close
-   print(("Opening book read: " + str(linecount) + " lines and " + str(movecount) + " positions"))
+   print("Opening book read: " + str(linecount) + " lines and " + str(movecount) + " positions")
 
 def book_addLine(line):
    # Each line is an opening. Add entries to transposition table
@@ -454,7 +453,7 @@ def book_addLine(line):
 
       success, pos = book_addEntry(pos, move)
       if not success:
-         print(('Illegal move in opening book', smove, line))
+         print('Illegal move in opening book', smove, line)
          break
       color = 1 - color      # alternating 0 and 1 (WHITE and BLACK)
       movecount += 1
@@ -463,7 +462,7 @@ def book_addLine(line):
 def book_addEntry(pos, move):
    # Add entry for opening book to transposition table
    if move not in gen_moves(pos):
-      print(('Illegal move:', move))
+      print('Illegal move:', move)
       return False, None
 
    posnew = pos.domove(move)

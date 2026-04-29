@@ -18,4 +18,5 @@ svg.create_svg(Board(fen="B:W16,19,33,34,47,K4:B17,25,26"))
 print(board)
 
 moves = board.legal_moves()
-print(moves)
+for move in moves:
+    print(move.pdn_move)

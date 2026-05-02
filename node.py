@@ -7,9 +7,9 @@ class Node:
     #    self.numVisits = 0
     #    self.value = 0
 
-    def __init__(self, board):
+    def __init__(self, board, parent = None, children = None):
         self.state = board
-        #self.parent = parent
-        #self.children = children
+        self.parent = parent
+        self.children = children
         self.numVisits = 0
         self.value = 0

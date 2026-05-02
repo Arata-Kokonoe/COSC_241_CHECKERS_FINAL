@@ -20,8 +20,7 @@ def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
     nextStates = []
     for move in board.legalMoves():
-        newBoard = board.copy()
-        newBoard.push(move)
+        newBoard = board.create_new_board_from_move(move)
         nextStates.append(newBoard)
     for state in nextStates: 
         root.children.add(Node(nextStates))

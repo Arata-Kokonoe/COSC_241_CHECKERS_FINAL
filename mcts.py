@@ -18,6 +18,7 @@ def available_actions(board):
 
 def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
+    rootPlayer = board.turn
     # for move in board.legalMoves():
     #     newBoard = board.create_new_board_from_move(move)
     #     nextStates.append(newBoard)
@@ -30,20 +31,24 @@ def MCTS(board, numIterations, explorationParameter, simIterations):
             nodeToExpand = getBestChild(nodeToExpand, explorationParameter)
         # 2: Expansion
         move = nodeToExpand.untriedMoves.pop()
-        newBoard = nodeToExpand.state.create_new_board_from_move(move)
-        nodeToEvaluate = Node(newBoard, nodeToExpand, None, move)
-        nodeToExpand.children.add(nodeToEvaluate)
+        newBoard = deepcopy(nodeToExpand.state)
+        newBoard.push(move)
+        nodeToEvaluate = Node(newBoard, nodeToExpand, [], move)
+        nodeToExpand.children.append(nodeToEvaluate)
         # 3: Simulate
-        value = simulation(nodeToEvaluate, simIterations)
+        value = simulation(nodeToEvaluate, simIterations, rootPlayer)
         # 4: Backpropagate
+        print(f"Backprop value: {value}")
         nodeToEvaluate.value = value
         nodeToEvaluate.numVisits += 1
         currNode = nodeToEvaluate
         while currNode.parent:
-            currNode = nodeToEvaluate.parent
+            print("Backpropagating")
+            currNode = currNode.parent
             currNode.value = value
             currNode.numVisits += 1
     # get the best action from root after numIterations
+    print("MCTS finished")
     bestChild = max(root.children, key=lambda child: child.value)
     return bestChild.move
 
@@ -59,19 +64,20 @@ def UCB(node, explorationParameter):
     UCB = node.value + (explorationParameter * math.sqrt(math.log(node.parent.numVisits) / node.numVisits))
     return UCB
 
-def fastRollout(board):
-    currState = board
+def fastRollout(board, rootPlayer):
+    currState = deepcopy(board)
+    print("Fast rollout")
     while not currState.is_over():
         moves = currState.legal_moves()
         nextMove = random.choice(moves)	# should be changed maybe? Use heuristic policy instead of random
-        currState = currState.create_new_board_from_move(nextMove)
-    # CHANGE CHANGE CHANGE (how do we tell the agent/opponent is playing for black or white?)
-    if currState.winner() == WHITE: return 1
-    elif currState.winner() == BLACK: return -1
+        currState.push(nextMove)
+    if currState.winner() == rootPlayer: return 1
+    elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
     else: return 0
 
-def simulation(node, simIterations):
+def simulation(node, simIterations, rootPlayer):
     totalValue = 0
     for i in range(simIterations):
-        totalValue += fastRollout(node.state)
+        print(f"Sim iteration {i}")
+        totalValue += fastRollout(node.state, rootPlayer)
     return totalValue / simIterations

@@ -3,7 +3,7 @@ from mcts import MCTS
 
 board = Board(variant="english", fen="startpos")
 move_count = 0
-while not board.is_over() and move_count < 50:  # Limit moves to prevent infinite loops
+while not board.is_over():
     move = MCTS(board, numIterations=10, explorationParameter=1.4, simIterations=5)
     board.push(move)
     move_count += 1

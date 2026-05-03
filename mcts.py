@@ -3,18 +3,11 @@ from node import Node
 from draughts import Board, Move, WHITE, BLACK
 from copy import deepcopy
 
-#starting_board = Board(variant="english", fen="startpos")
-
-#BOARD_SIZE = starting_board.width
-
 #returns 1 if white won, 2 if black won, 0 if none
 def check_winner_state(board):
     if board.winner() == WHITE: return 1
     elif board.winner() == BLACK: return 2
     else: return None
-
-def available_actions(board):
-    return board.legal_moves()
 
 def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
@@ -30,11 +23,14 @@ def MCTS(board, numIterations, explorationParameter, simIterations):
         while (not nodeToExpand.state.is_over()) and (len(nodeToExpand.untriedMoves) == 0):
             nodeToExpand = getBestChild(nodeToExpand, explorationParameter)
         # 2: Expansion
-        move = nodeToExpand.untriedMoves.pop()
-        newBoard = deepcopy(nodeToExpand.state)
-        newBoard.push(move)
-        nodeToEvaluate = Node(newBoard, nodeToExpand, move=move)
-        nodeToExpand.children.append(nodeToEvaluate)
+        if nodeToExpand.untriedMoves:
+            move = nodeToExpand.untriedMoves.pop()
+            newBoard = nodeToExpand.state.copy()
+            newBoard.push(move)
+            nodeToEvaluate = Node(newBoard, nodeToExpand, move=move)
+            nodeToExpand.children.append(nodeToEvaluate)
+        else:
+            nodeToEvaluate = nodeToExpand
         # 3: Simulate
         value = simulation(nodeToEvaluate, simIterations, rootPlayer)
         # 4: Backpropagate
@@ -62,10 +58,14 @@ def UCB(node, explorationParameter):
     return UCB
 
 def fastRollout(board, rootPlayer):
-    currState = deepcopy(board)
+    currState = board.copy()
     while not currState.is_over():
         moves = currState.legal_moves()
-        nextMove = random.choice(moves)	# should be changed maybe? Use heuristic policy instead of random
+        #epsilon-greedy
+        if random.random() < 0.2: #can replace 0.2 with higher value for more randomness
+            nextMove = random.choice(moves)
+        else:
+            nextMove = rolloutHeuristic(currState, moves, rootPlayer)
         currState.push(nextMove)
     if currState.winner() == rootPlayer: return 1
     elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
@@ -76,3 +76,36 @@ def simulation(node, simIterations, rootPlayer):
     for i in range(simIterations):
         totalValue += fastRollout(node.state, rootPlayer)
     return totalValue / simIterations
+
+def rolloutHeuristic(state, moves, player):
+    best_score = float('-inf')
+    best_moves = []
+    
+    for move in moves:
+        score = -countCapturablePieces(state, move, player)
+
+        #can add more weights here to change score
+        
+        if score > best_score:
+            best_score = score
+            best_moves = [move]
+        elif score == best_score:
+            best_moves.append(move)
+    
+    return random.choice(best_moves)
+
+def countPieces(board, player):
+    s = repr(board)
+    chars = ('w', 'W') if player == 1 else ('b', 'B')
+    return sum(s.count(c) for c in chars)
+
+def countCapturablePieces(board, move, player):
+    before = countPieces(board, player)
+
+    new_board = board.copy()
+    new_board.push(move)
+
+    after = countPieces(new_board, player)
+
+    captured = before - after
+    return captured

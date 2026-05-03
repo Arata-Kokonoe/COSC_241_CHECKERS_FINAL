@@ -1,7 +1,12 @@
-from draughts import Board
+from draughts import Board, svg
 from mcts import MCTS
 
 board = Board(variant="english", fen="startpos")
-move = MCTS(board, numIterations=10, explorationParameter=1.4, simIterations=5)
-print(f"MCTS returned move: {move}")
-print(f"Is move legal? {move in board.legal_moves()}")
+move_count = 0
+while not board.is_over() and move_count < 50:  # Limit moves to prevent infinite loops
+    move = MCTS(board, numIterations=10, explorationParameter=1.4, simIterations=5)
+    board.push(move)
+    move_count += 1
+    print(f"Move {move_count}: {move.pdn_move}")
+    print(board)  # Display board as text
+print(f"Game ended. Winner: {board.winner()}")

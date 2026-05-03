@@ -33,22 +33,19 @@ def MCTS(board, numIterations, explorationParameter, simIterations):
         move = nodeToExpand.untriedMoves.pop()
         newBoard = deepcopy(nodeToExpand.state)
         newBoard.push(move)
-        nodeToEvaluate = Node(newBoard, nodeToExpand, [], move)
+        nodeToEvaluate = Node(newBoard, nodeToExpand, move=move)
         nodeToExpand.children.append(nodeToEvaluate)
         # 3: Simulate
         value = simulation(nodeToEvaluate, simIterations, rootPlayer)
         # 4: Backpropagate
-        print(f"Backprop value: {value}")
         nodeToEvaluate.value = value
         nodeToEvaluate.numVisits += 1
         currNode = nodeToEvaluate
         while currNode.parent:
-            print("Backpropagating")
             currNode = currNode.parent
             currNode.value = value
             currNode.numVisits += 1
     # get the best action from root after numIterations
-    print("MCTS finished")
     bestChild = max(root.children, key=lambda child: child.value)
     return bestChild.move
 
@@ -66,7 +63,6 @@ def UCB(node, explorationParameter):
 
 def fastRollout(board, rootPlayer):
     currState = deepcopy(board)
-    print("Fast rollout")
     while not currState.is_over():
         moves = currState.legal_moves()
         nextMove = random.choice(moves)	# should be changed maybe? Use heuristic policy instead of random
@@ -78,6 +74,5 @@ def fastRollout(board, rootPlayer):
 def simulation(node, simIterations, rootPlayer):
     totalValue = 0
     for i in range(simIterations):
-        print(f"Sim iteration {i}")
         totalValue += fastRollout(node.state, rootPlayer)
     return totalValue / simIterations

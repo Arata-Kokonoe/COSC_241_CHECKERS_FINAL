@@ -37,13 +37,15 @@ def play_games(games = 5):
         mcts = mctsClass(board)
         while not board.is_over() and numMoves < 75:
             if board.turn == WHITE:
-                move = agent1.get_move(board)
-                # move = MCTS(board, numIterations=2, explorationParameter=1.4, simIterations=5)
-            else:
-                move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
                 # move = agent1.get_move(board)
+                move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
+            else:
+                # move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
+                move = agent1.get_move(board)
             print(numMoves)
+            print(move)
             board.push(move)
+            print(board)
             numMoves += 1
         winner = board.winner()
 

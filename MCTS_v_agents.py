@@ -32,13 +32,13 @@ def play_games(games = 5):
 
         print(f"Starting game {i + 1}")
         board = Board(variant="english", fen="startpos")
-        agent1 = opponent(color = BLACK)
+        agent1 = opponent(color = WHITE)
         numMoves = 0
         mcts = mctsClass(board)
         while not board.is_over() and numMoves < 75:
             if board.turn == WHITE:
                 # move = agent1.get_move(board)
-                move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
+                move = MCTS(board, numIterations=30, explorationParameter=1.4, simIterations=7)
             else:
                 # move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
                 move = agent1.get_move(board)

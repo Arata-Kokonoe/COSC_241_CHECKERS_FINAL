@@ -31,7 +31,7 @@ def MCTS(board, numIterations, explorationParameter, simIterations):
         currNode = nodeToEvaluate
         while currNode.parent:
             currNode = currNode.parent
-            currNode.value = value
+            currNode.value += value
             currNode.numVisits += 1
     # get the best action from root after numIterations
     bestChild = max(root.children, key=lambda child: child.value)
@@ -41,12 +41,13 @@ def getBestChild(node, explorationParameter):
     for child in node.children:
         if child.numVisits == 0: return child
     childrenValues = {}
+    logVisits = math.log(node.numVisits)
     for child in node.children:
         childrenValues[child] = UCB(child, explorationParameter)
     return max(childrenValues, key=childrenValues.get)
 
-def UCB(node, explorationParameter):
-    UCB = node.value + (explorationParameter * math.sqrt(math.log(node.parent.numVisits) / node.numVisits))
+def UCB(self, node, logParentVisits, explorationParameter):
+    UCB = node.value + (explorationParameter * math.sqrt(logParentVisits / node.numVisits))
     return UCB
 
 def fastRollout(board, rootPlayer):
@@ -70,34 +71,21 @@ def simulation(node, simIterations, rootPlayer):
     return totalValue / simIterations
 
 def rolloutHeuristic(state, moves, player):
-    best_score = float('-inf')
-    best_moves = []
-    
-    for move in moves:
-        score = -countCapturablePieces(state, move, player)
-
-        #can add more weights here to change score
+        best_score = float('-inf')
+        best_moves = []
         
-        if score > best_score:
-            best_score = score
-            best_moves = [move]
-        elif score == best_score:
-            best_moves.append(move)
-    
-    return random.choice(best_moves)
+        for move in moves:
+            score = -countCapturablePieces(move)
 
-def countPieces(board, player):
-    s = repr(board)
-    chars = ('w', 'W') if player == 1 else ('b', 'B')
-    return sum(s.count(c) for c in chars)
+            #can add more weights here to change score
+            
+            if score > best_score:
+                best_score = score
+                best_moves = [move]
+            elif score == best_score:
+                best_moves.append(move)
+        
+        return random.choice(best_moves)
 
-def countCapturablePieces(board, move, player):
-    before = countPieces(board, player)
-
-    new_board = board.copy()
-    new_board.push(move)
-
-    after = countPieces(new_board, player)
-
-    captured = before - after
-    return captured
+def countCapturablePieces(move):
+    return len(move.captures)

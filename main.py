@@ -11,6 +11,8 @@ while not board.is_over():
     
     #tests mcts class version
     move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
+
+    #move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=30)
     
     board.push(move)
     move_count += 1

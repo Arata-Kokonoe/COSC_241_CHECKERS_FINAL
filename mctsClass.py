@@ -5,10 +5,12 @@ from copy import deepcopy
 
 class mctsClass():
     def __init__(self, board):
-        self.root = Node(board.copy())
-        self.rootPlayer = board.copy().turn      
+        rootBoard = board.copy()
+        self.root = Node(rootBoard)
+        self.rootPlayer = rootBoard.turn      
 
     def search(self, numIterations, explorationParameter, simIterations):
+
         for i in range(numIterations):
             # 1: Selection
             nodeToExpand = self.root
@@ -31,23 +33,26 @@ class mctsClass():
             currNode = nodeToEvaluate
             while currNode.parent:
                 currNode = currNode.parent
-                currNode.value = value
+                currNode.value += value
                 currNode.numVisits += 1
         # get the best action from root after numIterations
         bestChild = max(self.root.children, key=lambda child: child.value)
-        self.root = Node(self.root.state.push(bestChild.move))
+        newBoard = self.root.state.copy()
+        newBoard.push(bestChild.move)
+        self.root = Node(newBoard)
         return bestChild.move
 
     def getBestChild(self, node, explorationParameter):
         for child in node.children:
             if child.numVisits == 0: return child
         childrenValues = {}
+        logVisits = math.log(node.numVisits)
         for child in node.children:
-            childrenValues[child] = self.UCB(child, explorationParameter)
+            childrenValues[child] = self.UCB(child, logVisits, explorationParameter)
         return max(childrenValues, key=childrenValues.get)
 
-    def UCB(self, node, explorationParameter):
-        UCB = node.value + (explorationParameter * math.sqrt(math.log(node.parent.numVisits) / node.numVisits))
+    def UCB(self, node, logParentVisits, explorationParameter):
+        UCB = node.value + (explorationParameter * math.sqrt(logParentVisits / node.numVisits))
         return UCB
 
     def fastRollout(self, board, rootPlayer):
@@ -64,6 +69,16 @@ class mctsClass():
         elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
         else: return 0
 
+    def randRollout(self, board, rootPlayer):
+        currState = board.copy()
+        while not currState.is_over():
+            moves = currState.legal_moves()
+            nextMove = random.choice(moves)
+            currState.push(nextMove)
+        if currState.winner() == rootPlayer: return 1
+        elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
+        else: return 0
+
     def simulation(self, node, simIterations, rootPlayer):
         totalValue = 0
         for i in range(simIterations):
@@ -75,7 +90,7 @@ class mctsClass():
         best_moves = []
         
         for move in moves:
-            score = -self.countCapturablePieces(state, move, player)
+            score = -self.countCapturablePieces(move)
 
             #can add more weights here to change score
             
@@ -87,18 +102,5 @@ class mctsClass():
         
         return random.choice(best_moves)
 
-    def countPieces(self, state, player):
-        s = repr(state)
-        chars = ('w', 'W') if player == 1 else ('b', 'B')
-        return sum(s.count(c) for c in chars)
-
-    def countCapturablePieces(self, state, move, player):
-        before = self.countPieces(state, player)
-
-        newState = state.copy()
-        newState.push(move)
-
-        after = self.countPieces(newState, player)
-
-        captured = before - after
-        return captured
+    def countCapturablePieces(self, move):
+        return len(move.captures)

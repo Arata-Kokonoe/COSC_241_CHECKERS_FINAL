@@ -6,7 +6,7 @@ from copy import deepcopy
 def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
     rootPlayer = board.turn
-    print(f"Starting MCTS with root player: {'White' if rootPlayer == WHITE else 'Black'}")
+    # print(f"Starting MCTS with root player: {'White' if rootPlayer == WHITE else 'Black'}")
     if len(root.untriedMoves) == 1:
         return root.untriedMoves[0]
     for i in range(numIterations):

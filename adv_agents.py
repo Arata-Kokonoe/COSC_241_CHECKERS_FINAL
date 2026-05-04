@@ -25,13 +25,30 @@ class opponent:
 
     def best_move(self, board):
         best_move = None
-        best_value = -float('inf') # create a negative value.
-
+        best_value = float('inf') # create a negative value.
+        val_moves = 0
         for move in board.legal_moves():
             newBoard = board.copy()
             newBoard.push(move)
+            
+            if newBoard.is_over():
+                best_move = move
+                break
 
-            value = self.position_eval(newBoard) # evaluate the position at hand.
+            for move2 in newBoard.legal_moves():
+                newBoard2 = newBoard.copy()
+                newBoard2.push(move2)
+                
+                if newBoard2.is_over():
+                    best_move = move
+                    break
+
+                value = self.position_eval(newBoard2) # evaluate the position at hand.
+                val_moves = (-2 * len(newBoard2.legal_moves())) # testing to see if this makes opponent better.
+                value += val_moves
+                if value < best_value:
+                    best_value = value
+                    best_move = move
             
             # Code below is subject to inclusion at a later date. It is designed to make this agent more competitve
             # if self.color == BLACK:
@@ -39,11 +56,6 @@ class opponent:
             #     value += ((2 * len(newBoard.legal_moves())) * -1)
             # else:
             #     value += (2 * len(newBoard.legal_moves()))
-
-            if value > best_value:
-                best_value = value
-                best_move = move
-        
         return best_move
 
     def position_eval(self, board):
@@ -57,15 +69,17 @@ class opponent:
             val = 0
             for p in pieces:
                 if p.startswith('K'):
-                    val += 500
+                    val += 200
                 else:
                     val += 100
             return val
 
         white_score = score(w_pieces) # determine the value of all the white pieces.
         black_score = score(b_pieces) # determine the value of all the black pieces.
-
-        return white_score - black_score # consider overall score of the position.
+        if self.color == WHITE:
+            return white_score - black_score
+        else:
+            return black_score - white_score # consider overall score of the position.
 
 ###
 # Below is a class that contains the code for an agent that plays randomly.

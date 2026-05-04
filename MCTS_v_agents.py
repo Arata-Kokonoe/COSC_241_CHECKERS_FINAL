@@ -1,6 +1,8 @@
 from draughts import Board, WHITE, BLACK
 from mcts import MCTS
 from adv_agents import opponent, random_agent
+import time
+from mctsClass import mctsClass
 
 # board = Board(variant="english", fen="startpos")
 # agent1 = opponent(color = WHITE)
@@ -25,23 +27,26 @@ from adv_agents import opponent, random_agent
 def play_games(games = 5):
     results = {WHITE: 0, BLACK: 0, "draw": 0}
     for i in range(games):
-        print(f"Starting game {i}")
+        start_time = time.time()
+
+        print(f"Starting game {i + 1}")
         board = Board(variant="english", fen="startpos")
-        agent1 = opponent(color = WHITE)
+        agent1 = opponent(color = BLACK)
         numMoves = 0
         while not board.is_over() and numMoves < 75:
             if board.turn == WHITE:
-                # move = agent1.get_move(board)
-                move = MCTS(board, numIterations=2, explorationParameter=1.4, simIterations=5)
-            else:
-                # move = MCTS(board, numIterations=2, explorationParameter=1.4, simIterations=5)
                 move = agent1.get_move(board)
+                # move = MCTS(board, numIterations=2, explorationParameter=1.4, simIterations=5)
+            else:
+                move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
+                # move = agent1.get_move(board)
             board.push(move)
             numMoves += 1
         winner = board.winner()
 
-        if not board.is_over():
-            results["draw"] += 1
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"Round {i + 1} took {duration:.2f} seconds\n")
 
         if winner == WHITE:
             results[WHITE] += 1

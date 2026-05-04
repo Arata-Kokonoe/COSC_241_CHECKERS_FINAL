@@ -1,7 +1,12 @@
 import math, random
+from time import time
+from tracemalloc import start
 from node import Node
 from draughts import Board, Move, WHITE, BLACK
 from copy import deepcopy
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from functools import partial
+import os
 
 def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
@@ -43,10 +48,10 @@ def getBestChild(node, explorationParameter):
     childrenValues = {}
     logVisits = math.log(node.numVisits)
     for child in node.children:
-        childrenValues[child] = UCB(child, explorationParameter)
+        childrenValues[child] = UCB(child, logVisits, explorationParameter)
     return max(childrenValues, key=childrenValues.get)
 
-def UCB(self, node, logParentVisits, explorationParameter):
+def UCB(node, logParentVisits, explorationParameter):
     UCB = node.value + (explorationParameter * math.sqrt(logParentVisits / node.numVisits))
     return UCB
 
@@ -65,10 +70,17 @@ def fastRollout(board, rootPlayer):
     else: return 0
 
 def simulation(node, simIterations, rootPlayer):
-    totalValue = 0
-    for i in range(simIterations):
-        totalValue += fastRollout(node.state, rootPlayer)
-    return totalValue / simIterations
+    num_cpu = os.cpu_count()
+    print(f"Running {simIterations} simulations using {num_cpu} CPU cores...")
+    with ProcessPoolExecutor(max_workers=num_cpu) as executor:
+        results = list(executor.map(fastRollout, [deepcopy(node.state)] * simIterations, [rootPlayer] * simIterations))
+    value = sum(results) / simIterations
+    print(f"Average simulation value: {value}")
+    return value
+#     # totalValue = 0
+#     # for i in range(simIterations):
+#     #     totalValue += fastRollout(node.state, rootPlayer)
+#     # return totalValue / simIterations
 
 def rolloutHeuristic(state, moves, player):
         best_score = float('-inf')

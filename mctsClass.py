@@ -83,6 +83,7 @@ class mctsClass():
         totalValue = 0
         for i in range(simIterations):
             totalValue += self.fastRollout(node.state, rootPlayer)
+        print(f"Simulation results: {totalValue / simIterations}")
         return totalValue / simIterations
 
     def rolloutHeuristic(self, state, moves, player):

@@ -26,6 +26,7 @@ from mctsClass import mctsClass
 
 def play_games(games = 5):
     results = {WHITE: 0, BLACK: 0, "draw": 0}
+    
     for i in range(games):
         start_time = time.time()
 
@@ -33,6 +34,7 @@ def play_games(games = 5):
         board = Board(variant="english", fen="startpos")
         agent1 = opponent(color = BLACK)
         numMoves = 0
+        mcts = mctsClass(board)
         while not board.is_over() and numMoves < 75:
             if board.turn == WHITE:
                 move = agent1.get_move(board)
@@ -40,6 +42,7 @@ def play_games(games = 5):
             else:
                 move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
                 # move = agent1.get_move(board)
+            print(numMoves)
             board.push(move)
             numMoves += 1
         winner = board.winner()

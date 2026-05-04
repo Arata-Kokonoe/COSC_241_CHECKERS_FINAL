@@ -15,7 +15,6 @@ from draughts import Board, Move, WHITE, BLACK
 # against the MCTS UCT agent.
 ####
 
-
 class opponent:
     def __init__(self, color=None):
         self.color = color

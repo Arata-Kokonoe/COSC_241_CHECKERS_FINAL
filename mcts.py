@@ -3,20 +3,12 @@ from node import Node
 from draughts import Board, Move, WHITE, BLACK
 from copy import deepcopy
 
-#returns 1 if white won, 2 if black won, 0 if none
-def check_winner_state(board):
-    if board.winner() == WHITE: return 1
-    elif board.winner() == BLACK: return 2
-    else: return None
-
 def MCTS(board, numIterations, explorationParameter, simIterations):
     root = Node(board)
     rootPlayer = board.turn
-    # for move in board.legalMoves():
-    #     newBoard = board.create_new_board_from_move(move)
-    #     nextStates.append(newBoard)
-    # for state in nextStates: 
-    #     root.children.add(Node(nextStates))
+    print(f"Starting MCTS with root player: {'White' if rootPlayer == WHITE else 'Black'}")
+    if len(root.untriedMoves) == 1:
+        return root.untriedMoves[0]
     for i in range(numIterations):
         # 1: Selection
         nodeToExpand = root

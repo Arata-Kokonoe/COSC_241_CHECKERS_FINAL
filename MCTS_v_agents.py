@@ -26,7 +26,8 @@ from mctsClass import mctsClass
 
 def play_games(games = 5):
     results = {WHITE: 0, BLACK: 0, "draw": 0}
-    
+    game_times = []
+
     for i in range(games):
         start_time = time.time()
 
@@ -42,15 +43,16 @@ def play_games(games = 5):
             else:
                 # move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=5)
                 move = agent1.get_move(board)
-            print(numMoves)
-            print(move)
+            #print(numMoves)
+            #print(move)
             board.push(move)
-            print(board)
+            #print(board)
             numMoves += 1
         winner = board.winner()
 
         end_time = time.time()
         duration = end_time - start_time
+        game_times.append(duration)
         print(f"Round {i + 1} took {duration:.2f} seconds\n")
 
         if winner == WHITE:
@@ -61,5 +63,7 @@ def play_games(games = 5):
             results["draw"] += 1    
     print("Results after", games, "games:")
     print(results)
+    print()
+    print(game_times)
 
 play_games(5)

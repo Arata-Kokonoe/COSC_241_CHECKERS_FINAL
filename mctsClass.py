@@ -1,21 +1,38 @@
 import math, random
 from node import Node
 from draughts import Board, Move, WHITE, BLACK
-from copy import deepcopy
+import os
+from functools import partial
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+import time
 
 class mctsClass():
-    def __init__(self, board):
-        rootBoard = board.copy()
-        self.root = Node(rootBoard)
-        self.rootPlayer = rootBoard.turn      
+    def __init__(self, numIterations, explorationParameter, simIterations):
+        self.numIterations = numIterations
+        self.explorationParameter = explorationParameter
+        self.simIterations = simIterations
+        self.executor = ThreadPoolExecutor(max_workers=os.cpu_count())
 
-    def search(self, numIterations, explorationParameter, simIterations):
+    def search(self, board, numIterations=None, explorationParameter=None, simIterations=None):
+        root = Node(board)
+        rootPlayer = board.turn
 
-        for i in range(numIterations):
+        if len(root.untriedMoves) == 1:
+            return root.untriedMoves[0]
+
+        if numIterations:
+            self.numIterations = numIterations
+        if explorationParameter:
+            self.explorationParameter = explorationParameter
+        if simIterations:
+            self.simIterations = simIterations
+
+        for i in range(self.numIterations):
+            t = time.perf_counter()
             # 1: Selection
-            nodeToExpand = self.root
+            nodeToExpand = root
             while (not nodeToExpand.state.is_over()) and (len(nodeToExpand.untriedMoves) == 0):
-                nodeToExpand = self.getBestChild(nodeToExpand, explorationParameter)
+                nodeToExpand = self.getBestChild(nodeToExpand, self.explorationParameter)
             # 2: Expansion
             if nodeToExpand.untriedMoves:
                 move = nodeToExpand.untriedMoves.pop()
@@ -26,7 +43,7 @@ class mctsClass():
             else:
                 nodeToEvaluate = nodeToExpand
             # 3: Simulate
-            value = self.simulation(nodeToEvaluate, simIterations, self.rootPlayer)
+            value = self.simulation(nodeToEvaluate, self.simIterations, rootPlayer)
             # 4: Backpropagate
             nodeToEvaluate.value = value
             nodeToEvaluate.numVisits += 1
@@ -36,10 +53,7 @@ class mctsClass():
                 currNode.value += value
                 currNode.numVisits += 1
         # get the best action from root after numIterations
-        bestChild = max(self.root.children, key=lambda child: child.value)
-        newBoard = self.root.state.copy()
-        newBoard.push(bestChild.move)
-        self.root = Node(newBoard)
+        bestChild = max(root.children, key=lambda child: child.value)
         return bestChild.move
 
     def getBestChild(self, node, explorationParameter):
@@ -56,37 +70,43 @@ class mctsClass():
         return UCB
 
     def fastRollout(self, board, rootPlayer):
-        currState = board.copy()
-        while not currState.is_over():
-            moves = currState.legal_moves()
+        while not board.is_over():
+            moves = board.legal_moves()
             #epsilon-greedy
             if random.random() < 0.2: #can replace 0.2 with higher value for more randomness
                 nextMove = random.choice(moves)
             else:
-                nextMove = self.rolloutHeuristic(currState, moves, rootPlayer)
-            currState.push(nextMove)
-        if currState.winner() == rootPlayer: return 1
-        elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
+                nextMove = self.fastHeuristic(board, moves, rootPlayer)
+            board.push(nextMove)
+        if board.winner() == rootPlayer: return 1
+        elif board.winner() != rootPlayer and board.winner() is not None: return -1
         else: return 0
 
     def randRollout(self, board, rootPlayer):
-        currState = board.copy()
-        while not currState.is_over():
-            moves = currState.legal_moves()
+
+        while not board.is_over():
+            moves = board.legal_moves()
             nextMove = random.choice(moves)
-            currState.push(nextMove)
-        if currState.winner() == rootPlayer: return 1
-        elif currState.winner() != rootPlayer and currState.winner() is not None: return -1
+            board.push(nextMove)
+        if board.winner() == rootPlayer: return 1
+        elif board.winner() != rootPlayer and board.winner() is not None: return -1
         else: return 0
 
+    #def simulation(self, node, simIterations, rootPlayer):
+        print(f"Running {simIterations} simulations using {os.cpu_count()} CPU cores...")
+        results = list(self.executor.map(self.fastRollout, [node.state.copy() for _ in range(simIterations)], [rootPlayer] * simIterations))
+        value = sum(results) / simIterations
+        print(f"Average simulation value: {value}")
+        return value
+    
     def simulation(self, node, simIterations, rootPlayer):
-        totalValue = 0
-        for i in range(simIterations):
-            totalValue += self.fastRollout(node.state, rootPlayer)
-        print(f"Simulation results: {totalValue / simIterations}")
-        return totalValue / simIterations
+        total = 0
+        board = node.state
+        for _ in range(simIterations):
+            total += self.randRollout(board.copy(), rootPlayer)
+        return total / simIterations
 
-    def rolloutHeuristic(self, state, moves, player):
+    def fastHeuristic(self, state, moves, player):
         best_score = float('-inf')
         best_moves = []
         

@@ -4,10 +4,11 @@ from draughts import Board, svg
 from mcts import MCTS
 from mctsClass import mctsClass
 
+
 def main():
     board = Board(variant="english", fen="startpos")
     move_count = 0
-    mcts = mctsClass(board)
+    mcts = mctsClass(numIterations=30, explorationParameter=1.4, simIterations=7)
     while not board.is_over():
         #tests mcts function version (original)
         t1 = time()
@@ -15,10 +16,10 @@ def main():
         t2 = time()
         print(f"MCTS Move Time: {t2-t1:.2f}s")
         #tests mcts class version
-        # t1 = time()
-        # move = mcts.search(numIterations=10, explorationParameter=1.4, simIterations=10)
-        # t2 = time()
-        # print(f"MCTS Move Time: {t2-t1:.2f}s")
+        #t1 = time()
+        #move = mcts.search(board)
+        #t2 = time()
+        #print(f"MCTS Move Time: {t2-t1:.2f}s")
         board.push(move)
         move_count += 1
         print(f"Move {move_count}: {move.pdn_move}")

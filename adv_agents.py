@@ -86,6 +86,8 @@ class opponent:
 ###
 
 class random_agent:
+    def __init__(self):
+        self = self
     def get_move(self, board):
         moves = list(board.legal_moves())
         return random.choice(moves)

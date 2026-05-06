@@ -7,6 +7,9 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import time
 
 class mctsClass():
+    #numIterations controls how many times we run the full MCTS loop
+    #explorationParameter controls how aggressively MCTS balances exploration vs. exploitation
+    #simIterations controls how many simulations are done to evaluate each node
     def __init__(self, numIterations, explorationParameter, simIterations):
         self.numIterations = numIterations
         self.explorationParameter = explorationParameter
@@ -69,6 +72,7 @@ class mctsClass():
         UCB = node.value + (explorationParameter * math.sqrt(logParentVisits / node.numVisits))
         return UCB
 
+    #uses epsilon-greedy policy to choose between random move or heuristically chosen move
     def fastRollout(self, board, rootPlayer):
         while not board.is_over():
             moves = board.legal_moves()
@@ -82,8 +86,8 @@ class mctsClass():
         elif board.winner() != rootPlayer and board.winner() is not None: return -1
         else: return 0
 
+    #chooses random moves
     def randRollout(self, board, rootPlayer):
-
         while not board.is_over():
             moves = board.legal_moves()
             nextMove = random.choice(moves)
@@ -92,20 +96,21 @@ class mctsClass():
         elif board.winner() != rootPlayer and board.winner() is not None: return -1
         else: return 0
 
-    #def simulation(self, node, simIterations, rootPlayer):
+    def simulation(self, node, simIterations, rootPlayer):
         print(f"Running {simIterations} simulations using {os.cpu_count()} CPU cores...")
         results = list(self.executor.map(self.fastRollout, [node.state.copy() for _ in range(simIterations)], [rootPlayer] * simIterations))
         value = sum(results) / simIterations
         print(f"Average simulation value: {value}")
         return value
     
-    def simulation(self, node, simIterations, rootPlayer):
-        total = 0
-        board = node.state
-        for _ in range(simIterations):
-            total += self.randRollout(board.copy(), rootPlayer)
-        return total / simIterations
+    #def simulation(self, node, simIterations, rootPlayer):
+        #total = 0
+        #board = node.state
+        #for _ in range(simIterations):
+        #    total += self.randRollout(board.copy(), rootPlayer)
+        #return total / simIterations
 
+    #scores each move based on how many capturable pieces you are left with after the move
     def fastHeuristic(self, state, moves, player):
         best_score = float('-inf')
         best_moves = []
